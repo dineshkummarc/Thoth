@@ -17,10 +17,21 @@ So your function has to return the filePath where the server can find the file.
 */
 
 var mimeTypeJSON = 'application/json';
+var serverObj = require('lib/core/Server.js');
 
 //exports.myFunc = function(params,callback){
 //    callback({ mimeType: mimeTypeJSON, responseObject: {message: "This is a nice answer"} });
 //};
+
+exports.checkForUpload = function(params,callback){
+  var userData = params.userData;
+
+  if (userData.username === 'test' && userData.password === 'test') {
+    serverObj.registerTemporaryURL('upload', params.uploadCacheKey, {}, 0, 'num', false);
+  } else {
+    callback({ mimeType: mimeTypeJSON, responseObject: {message: "redlight"} });
+  }
+};
 
 exports.uploadImageAndProcess = function(params,callback){
   var formData = params.formData,
@@ -34,9 +45,12 @@ exports.uploadImageAndProcess = function(params,callback){
       files = [],
       fields = [];
 
+  // get the temporary url
+
   form.uploadDir = './tmp';
 
   sys.log('uploadImageAndProcess called, calling formidable');
+  sys.log(util.inspect(formData));
   form
     .on('field', function(field, value) {
       p([field, value]);
