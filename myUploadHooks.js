@@ -25,12 +25,14 @@ var sys = require('sys');
 //};
 
 exports.checkInPreparationForUpload = function(params,callback){
-  var message, userData = params.userData;
+  var permission,
+      userData = params.userData,
+      cacheKey = params.cacheKey;
 
   if (userData.username === 'test' && userData.password === 'test') {
-    message = { permission: 'granted'};
+    permission = 'granted';
   } else {
-    message = { permission: 'denied'};
+    permission = 'denied';
   }
 
   // other things to check ...
@@ -39,9 +41,7 @@ exports.checkInPreparationForUpload = function(params,callback){
   //   - if fotofoo style directory handling is added, could create the dir if needed, etc.
   //   -
 
-  sys.log('AAAAAAAAAAAAAAAAAAAAAA ', message.permission);
-  
-  callback({ mimeType: mimeTypeJSON, responseObject: { message: message } });
+  callback({ mimeType: mimeTypeJSON, responseObject: { permission: permission} });
 };
 //
 //exports.uploadImageAndProcess = function(params,callback){
