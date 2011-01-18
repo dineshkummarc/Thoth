@@ -17,70 +17,81 @@ So your function has to return the filePath where the server can find the file.
 */
 
 var mimeTypeJSON = 'application/json';
-var serverObj = require('lib/core/Server.js');
+var serverObj = require('./lib/core/Server');
+var sys = require('sys');
 
 //exports.myFunc = function(params,callback){
 //    callback({ mimeType: mimeTypeJSON, responseObject: {message: "This is a nice answer"} });
 //};
 
-exports.checkForUpload = function(params,callback){
-  var userData = params.userData;
+exports.checkInPreparationForUpload = function(params,callback){
+  var message, userData = params.userData;
 
   if (userData.username === 'test' && userData.password === 'test') {
-    serverObj.registerTemporaryURL('upload', params.uploadCacheKey, {}, 0, 'num', false);
+    message = { permission: 'granted'};
   } else {
-    callback({ mimeType: mimeTypeJSON, responseObject: {message: "redlight"} });
+    message = { permission: 'denied'};
   }
+
+  // other things to check ...
+  //
+  //   - is there already a file by that name? if so, check policy, maybe return a message
+  //   - if fotofoo style directory handling is added, could create the dir if needed, etc.
+  //   -
+
+  sys.log('AAAAAAAAAAAAAAAAAAAAAA ', message.permission);
+  
+  callback({ mimeType: mimeTypeJSON, responseObject: { message: message } });
 };
-
-exports.uploadImageAndProcess = function(params,callback){
-  var formData = params.formData,
-      cacheKey = params.cacheKey,
-      spawn = require('child_process').spawn,
-      fs = require('fs'),
-      sys = require('sys'),
-      formidable = require('./lib/node-formidable/lib/formidable'),
-      util = require('./lib/node-formidable/lib/formidable/util'),
-      form = new formidable.IncomingForm(),
-      files = [],
-      fields = [];
-
-  // get the temporary url
-
-  form.uploadDir = './tmp';
-
-  sys.log('uploadImageAndProcess called, calling formidable');
-  sys.log(util.inspect(formData));
-  form
-    .on('field', function(field, value) {
-      p([field, value]);
-      fields.push([field, value]);
-    })
-    .on('file', function(field, file) {
-      p([field, file]);
-      files.push([field, file]);
-    })
-    .on('end', function() {
-      sys.log("processIamgeAfterUpload: upload done, now renaming " + files[0][1]);
-      var pathHash = form.uploadDir + '/' + files[0][1],
-          pathNormal = form.uploadDir + '/' + params.filename;
-
-      var promise = fs.rename(pathHash, pathNormal);
-      promise.addCallback(function() {
-        if(err) sys.log("Upload: uploadImageAndProcess: error: " + err);
-        sys.log('Upload uploadImageAndProcess: starting imagemagick query');
-        var improc = spawn('identify',["-format",'"%w,%h"', pathNormal]);
-        improc.on('exit', function(code){
-          // clean up and send back filepath
-          sys.log('process for uploadCacheKey ' + cacheKey + ' exited with code: ' + code);
-          callback({ mimeType: 'text/url', filePath: 'something urlish ' + pathNormal});
-        });
-      });
-    });
-  form.parse(formData);
-
-};
-
+//
+//exports.uploadImageAndProcess = function(params,callback){
+//  var formData = params.formData,
+//      cacheKey = params.cacheKey,
+//      spawn = require('child_process').spawn,
+//      fs = require('fs'),
+//      sys = require('sys'),
+//      formidable = require('./lib/node-formidable/lib/formidable'),
+//      util = require('./lib/node-formidable/lib/formidable/util'),
+//      form = new formidable.IncomingForm(),
+//      files = [],
+//      fields = [];
+//
+//  // get the temporary url
+//
+//  form.uploadDir = './tmp';
+//
+//  sys.log('uploadImageAndProcess called, calling formidable');
+//  sys.log(util.inspect(formData));
+//  form
+//    .on('field', function(field, value) {
+//      p([field, value]);
+//      fields.push([field, value]);
+//    })
+//    .on('file', function(field, file) {
+//      p([field, file]);
+//      files.push([field, file]);
+//    })
+//    .on('end', function() {
+//      sys.log("processIamgeAfterUpload: upload done, now renaming " + files[0][1]);
+//      var pathHash = form.uploadDir + '/' + files[0][1],
+//          pathNormal = form.uploadDir + '/' + params.filename;
+//
+//      var promise = fs.rename(pathHash, pathNormal);
+//      promise.addCallback(function() {
+//        if(err) sys.log("Upload: uploadImageAndProcess: error: " + err);
+//        sys.log('Upload uploadImageAndProcess: starting imagemagick query');
+//        var improc = spawn('identify',["-format",'"%w,%h"', pathNormal]);
+//        improc.on('exit', function(code){
+//          // clean up and send back filepath
+//          sys.log('process for uploadCacheKey ' + cacheKey + ' exited with code: ' + code);
+//          callback({ mimeType: 'text/url', filePath: 'something urlish ' + pathNormal});
+//        });
+//      });
+//    });
+//  form.parse(formData);
+//
+//};
+//
 
 //exports.createPdfFromTex = function(params,callback){
 //  var texSource = params.texSource;
