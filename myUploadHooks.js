@@ -27,7 +27,7 @@ var sys = require('sys');
 exports.checkInPreparationForUpload = function(params,callback){
   var permission,
       userData = params.userData,
-      cacheKey = params.cacheKey;
+      associated = params.associated;
 
   if (userData.username === 'test' && userData.password === 'test') {
     permission = 'granted';
