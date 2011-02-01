@@ -24,13 +24,19 @@ var sys = require('sys');
 //    callback({ mimeType: mimeTypeJSON, responseObject: {message: "This is a nice answer"} });
 //};
 
-exports.checkInPreparationForUpload = function(params,callback){
+_associatedItemsCache = null; // array of { bucket, key, property } items
+_opRequestsQueue = null; // e.g., resize, crop, rotate, zip, cp, mv
+
+exports.prepareForUpload = function(params,callback){
   var permission,
       userData = params.userData,
+      opRequests = params.opRequests;
       associated = params.associated;
 
   if (userData.username === 'test' && userData.password === 'test') {
     permission = 'granted';
+    this._associatedItemsCache = associated;
+    this._opRequestsQueue = opRequests;
   } else {
     permission = 'denied';
   }
